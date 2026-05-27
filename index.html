@@ -63,7 +63,7 @@ body {
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: #3a3f4d; border-radius: 2px; }
 
 #app {
   max-width: 480px;
@@ -106,7 +106,7 @@ body {
   font-size: 14px;
   transition: all 0.15s;
 }
-.icon-btn:hover, .icon-btn:active { background: var(--surface-dim); color: var(--text); border-color: #D1D5DB; }
+.icon-btn:hover, .icon-btn:active { background: var(--surface-dim); color: var(--text); border-color: rgba(255,255,255,0.1); }
 .icon-btn svg { width: 16px; height: 16px; }
 
 /* Tab Bar */
@@ -181,8 +181,8 @@ body {
 
 /* Net Worth Card */
 .nw-card {
-  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #C7D2FE 100%);
-  border: 1px solid rgba(99,102,241,0.15);
+  background: linear-gradient(135deg, #1a2040 0%, #131829 100%);
+  border: 1px solid rgba(108,138,255,0.2);
   border-radius: var(--radius);
   padding: 24px 20px;
   box-shadow: var(--shadow);
@@ -210,8 +210,8 @@ body {
 .nw-change.neg { color: var(--negative); }
 
 .month-select {
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(99,102,241,0.2);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(108,138,255,0.2);
   border-radius: var(--radius-xs);
   color: var(--text);
   font-family: 'JetBrains Mono', monospace;
@@ -241,7 +241,7 @@ body {
 .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .progress-name { font-size: 13px; font-weight: 600; color: var(--text); }
 .progress-vals { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-2); }
-.progress-track { height: 6px; background: #E5E7EB; border-radius: 3px; overflow: hidden; }
+.progress-track { height: 6px; background: #222637; border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
 
 /* FIRE Grid */
@@ -282,7 +282,7 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(67,97,238,0.1);
+  box-shadow: 0 0 0 3px rgba(108,138,255,0.2);
 }
 select option { background: var(--surface); }
 input[type=number] { font-family: 'JetBrains Mono', monospace; }
@@ -306,8 +306,8 @@ input[type=number] { font-family: 'JetBrains Mono', monospace; }
 .btn-primary:hover { background: var(--accent-hover); }
 .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
 .btn-ghost:hover { background: var(--surface-dim); color: var(--text); }
-.btn-success { background: var(--positive-bg); color: var(--positive); border: 1px solid rgba(5,150,105,0.2); }
-.btn-success:hover { background: #D1FAE5; }
+.btn-success { background: var(--positive-bg); color: var(--positive); border: 1px solid rgba(62,207,142,0.3); }
+.btn-success:hover { background: rgba(62,207,142,0.2); }
 .btn-full { width: 100%; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-sm { padding: 6px 10px; font-size: 12px; }
@@ -425,7 +425,7 @@ input[type=number] { font-family: 'JetBrains Mono', monospace; }
 
 /* Skeleton */
 .skeleton {
-  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background: linear-gradient(90deg, #1a1e29 25%, #222637 50%, #1a1e29 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--radius-sm);
@@ -564,8 +564,8 @@ function PieChart({ data, colors }) {
         datasets: [{
           data: data.map(d => d.amount),
           backgroundColor: colors,
-          borderColor: '#FFFFFF',
-          borderWidth: 3,
+          borderColor: '#13161e',
+          borderWidth: 2,
         }]
       },
       options: {
@@ -637,7 +637,7 @@ function BarChart({ data }) {
         datasets: [{
           label: 'Net Worth',
           data: data.map(d => d.nw),
-          backgroundColor: '#4361EE',
+          backgroundColor: '#6c8aff',
           borderRadius: 4,
           borderSkipped: false,
         }]
@@ -657,12 +657,12 @@ function BarChart({ data }) {
         scales: {
           y: {
             beginAtZero: false,
-            ticks: { callback: v => fmt(v), color: '#9CA3AF', font: { size: 10, family: 'Inter' }, maxTicksLimit: 5 },
-            grid: { color: 'rgba(0,0,0,0.04)' },
+            ticks: { callback: v => fmt(v), color: '#555a6e', font: { size: 10, family: 'Inter' }, maxTicksLimit: 5 },
+            grid: { color: 'rgba(255,255,255,0.04)' },
             border: { display: false }
           },
           x: {
-            ticks: { color: '#9CA3AF', font: { size: 10, family: 'Inter' }, maxTicksLimit: 12, maxRotation: 0 },
+            ticks: { color: '#555a6e', font: { size: 10, family: 'Inter' }, maxTicksLimit: 12, maxRotation: 0 },
             grid: { display: false },
             border: { display: false }
           }
@@ -681,7 +681,7 @@ function BarChart({ data }) {
 }
 
 // ─── PROGRESS BAR ─────────────────────────────────────────
-function ProgressBar({ name, current, target, color = '#4361EE' }) {
+function ProgressBar({ name, current, target, color = '#6c8aff' }) {
   const pct = target > 0 ? Math.min(100, (current / target) * 100) : 0;
   return (
     <div className="progress-row">
@@ -792,7 +792,7 @@ function DashboardTab({ data, loading, currency }) {
         <div className="section-title">Asset Goals</div>
         {(data.assetGoals || []).length > 0 ? (
           data.assetGoals.map(g => (
-            <ProgressBar key={g.category} name={g.category} current={g.current} target={g.target} color={CATEGORY_COLORS[g.category] || '#4361EE'} />
+            <ProgressBar key={g.category} name={g.category} current={g.current} target={g.target} color={CATEGORY_COLORS[g.category] || '#6c8aff'} />
           ))
         ) : <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Add goal targets to Config sheet</div>}
       </div>
@@ -1114,7 +1114,7 @@ function TestConnectionButton({ onToast }) {
         <div style={{
           marginTop: 10, padding: '10px 12px', borderRadius: 8, fontSize: 13,
           background: result.ok ? 'var(--positive-bg)' : 'var(--negative-bg)',
-          border: '1px solid ' + (result.ok ? 'rgba(5,150,105,0.3)' : 'rgba(220,38,38,0.3)'),
+          border: '1px solid ' + (result.ok ? 'rgba(62,207,142,0.3)' : 'rgba(255,102,102,0.3)'),
           color: result.ok ? 'var(--positive)' : 'var(--negative)',
           wordBreak: 'break-word', fontWeight: 500
         }}>
@@ -1251,7 +1251,7 @@ function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, o
                     <div className="account-item-name">{acc.account}</div>
                     <div style={{ display: 'flex', gap: 5, marginTop: 4, alignItems: 'center' }}>
                       <span className={'type-badge ' + (acc.type === 'Asset' ? 'asset' : 'debt')}>{acc.type}</span>
-                      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#F3F4F6', color: 'var(--text-2)', fontFamily: "'JetBrains Mono'" }}>{acc.currency}</span>
+                      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--surface-dim)', color: 'var(--text-2)', fontFamily: "'JetBrains Mono'" }}>{acc.currency}</span>
                     </div>
                   </div>
                   <div className="account-actions">

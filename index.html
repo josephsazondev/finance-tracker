@@ -662,7 +662,17 @@ function BarChart({ data }) {
             border: { display: false }
           },
           x: {
-            ticks: { color: '#555a6e', font: { size: 10, family: 'Inter' }, maxTicksLimit: 12, maxRotation: 0 },
+            ticks: {
+              color: '#555a6e',
+              font: { size: 10, family: 'Inter' },
+              autoSkip: false,
+              callback: function(value, index) {
+                const skipInterval = Math.max(1, Math.ceil(data.length / 6));
+                return index % skipInterval === 0 ? data[index].month : '';
+              },
+              maxRotation: data.length > 24 ? 90 : data.length > 6 ? 45 : 0,
+              minRotation: data.length > 24 ? 45 : data.length > 6 ? 30 : 0
+            },
             grid: { display: false },
             border: { display: false }
           }

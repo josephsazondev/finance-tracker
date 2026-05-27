@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Finance Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236c8aff' width='100' height='100'/><text x='50' y='65' font-size='60' font-weight='bold' fill='white' text-anchor='middle'>ƒ</text></svg>" />
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0f14;
+    --bg2: #13161e;
+    --bg3: #1a1e29;
+    --bg4: #222637;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --text2: #8b90a0;
+    --text3: #555a6e;
+    --accent: #6c8aff;
+    --accent2: #4d6fff;
+    --green: #3ecf8e;
+    --red: #f66;
+    --amber: #f5a623;
+    --teal: #2dd4bf;
+    --purple: #a78bfa;
+  }
+  html { font-size: 16px; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+
+  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+
+  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-logo { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; color: var(--text); }
+  .header-logo span { color: var(--accent); }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn { background: none; border: 1px solid var(--border); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 16px; transition: all 0.15s; }
+  .icon-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+
+  .tab-bar { background: var(--bg2); border-top: 1px solid var(--border); display: flex; position: sticky; bottom: 0; z-index: 100; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 0 8px; cursor: pointer; color: var(--text3); transition: color 0.15s; border: none; background: none; font-family: 'DM Sans'; }
+  .tab-item.active { color: var(--accent); }
+  .tab-item svg { width: 20px; height: 20px; }
+  .tab-label { font-size: 10px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; }
+
+  .content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 80px; display: flex; flex-direction: column; gap: 14px; }
+
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+
+  .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+
+  .nw-card { background: linear-gradient(135deg, #1a2040 0%, #131829 100%); border: 1px solid rgba(108,138,255,0.2); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .nw-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .nw-amount { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 500; color: var(--text); line-height: 1; margin-bottom: 8px; }
+  .nw-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+  .nw-change { display: flex; align-items: center; gap: 4px; font-weight: 500; }
+  .nw-change.pos { color: var(--green); }
+  .nw-change.neg { color: var(--red); }
+
+  .month-select { background: rgba(255,255,255,0.05); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-family: 'DM Mono'; font-size: 12px; padding: 4px 8px; cursor: pointer; outline: none; }
+
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .metric-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .metric-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 6px; }
+  .metric-value { font-family: 'DM Mono'; font-size: 18px; font-weight: 500; }
+  .metric-value.green { color: var(--green); }
+  .metric-value.red { color: var(--red); }
+
+  .progress-row { margin-bottom: 12px; }
+  .progress-row:last-child { margin-bottom: 0; }
+  .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .progress-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .progress-vals { font-size: 11px; font-family: 'DM Mono'; color: var(--text2); }
+  .progress-track { height: 6px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+  .fire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fire-stat { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .fire-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 4px; }
+  .fire-stat-val { font-family: 'DM Mono'; font-size: 15px; font-weight: 500; color: var(--teal); }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 6px; }
+  input, select, textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-family: 'DM Sans'; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--bg3); }
+  input[type=number] { font-family: 'DM Mono'; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; border-radius: 8px; font-family: 'DM Sans'; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--bg3); color: var(--text); }
+  .btn-success { background: rgba(62,207,142,0.15); color: var(--green); border: 1px solid rgba(62,207,142,0.3); }
+  .btn-success:hover { background: rgba(62,207,142,0.25); }
+  .btn-full { width: 100%; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-sm { padding: 6px 10px; font-size: 12px; }
+
+  .entry-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .entry-row:last-child { border-bottom: none; }
+  .entry-info { flex: 1; min-width: 0; }
+  .entry-account { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+  .entry-meta { font-size: 11px; color: var(--text3); }
+  .entry-amount { font-family: 'DM Mono'; font-size: 14px; font-weight: 500; text-align: right; white-space: nowrap; }
+  .entry-actions { display: flex; gap: 4px; }
+  .entry-edit-input { font-family: 'DM Mono'; font-size: 14px; width: 120px; }
+
+  .copy-table { width: 100%; border-collapse: collapse; }
+  .copy-table th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .copy-table td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .copy-table input { padding: 6px 8px; font-size: 13px; width: 100%; }
+
+  .account-group { margin-bottom: 16px; }
+  .account-group-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); padding: 8px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .account-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; }
+  .account-item-info { flex: 1; min-width: 0; }
+  .account-item-name { font-size: 14px; font-weight: 500; }
+  .account-item-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .account-actions { display: flex; gap: 4px; }
+  .type-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+  .type-badge.asset { background: rgba(62,207,142,0.12); color: var(--green); }
+  .type-badge.debt { background: rgba(255,102,102,0.12); color: var(--red); }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: flex-end; justify-content: center; padding: 16px; }
+  .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px 16px 12px 12px; width: 100%; max-width: 480px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 500; z-index: 300; }
+  .toast.success { border-color: rgba(62,207,142,0.4); color: var(--green); }
+  .toast.error { border-color: rgba(255,102,102,0.4); color: var(--red); }
+
+  .chart-container { position: relative; height: 220px; margin: 10px 0; }
+  .pie-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .pie-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .pie-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  .skeleton { background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; height: 40px; margin-bottom: 10px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .sync-dot.ok { background: var(--green); }
+  .sync-dot.err { background: var(--red); }
+
+  .empty { text-align: center; padding: 32px 16px; color: var(--text3); font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ─── UTILS ────────────────────────────────────────────────
+function fmt(n) {
+  if (n === undefined || n === null || isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return (n / 1_000_000).toFixed(2) + 'M';
+  if (abs >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtFull(n) {
+  if (n === undefined || isNaN(n)) return '—';
+  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function getConfig() {
+  try { return JSON.parse(localStorage.getItem('ftConfig') || '{}'); } catch { return {}; }
+}
+
+function saveConfig(c) { localStorage.setItem('ftConfig', JSON.stringify(c)); }
+
+// ─── API (JSONP only — bypasses CORS completely) ──────────
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = `_cb_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Request timed out after 15s — is your Apps Script URL correct and deployed as "Anyone can access"?'));
+    }, 15000);
+
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cbName] = (data) => {
+      cleanup();
+      if (data && data.error) reject(new Error(data.error));
+      else resolve(data);
+    };
+
+    const fullUrl = url + '&callback=' + cbName;
+    console.log('[API] JSONP request:', fullUrl);
+    script.src = fullUrl;
+    script.onerror = (err) => {
+      cleanup();
+      console.error('[API] Script load error:', err);
+      reject(new Error('Script load failed — open the URL in a new tab to check: ' + url.split('?')[0]));
+    };
+    document.head.appendChild(script);
+  });
+}
+
+async function api(path, action, params = {}, body = null) {
+  const cfg = getConfig();
+  if (!cfg.url) throw new Error('No API URL set. Go to Settings and paste your Apps Script URL.');
+  if (!cfg.apiKey) throw new Error('No API key set. Go to Settings and enter your API key.');
+
+  // Trim accidental whitespace from saved config
+  const baseUrl = cfg.url.trim();
+  const apiKey = (cfg.apiKey || '').trim();
+
+  const url = new URL(baseUrl);
+  url.searchParams.set('path', path);
+  url.searchParams.set('api_key', apiKey);
+  if (action) url.searchParams.set('action', action);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  if (body) url.searchParams.set('body', JSON.stringify(body));
+
+  return jsonp(url.toString());
+}
+
+// ─── TOAST ────────────────────────────────────────────────
+function useToast() {
+  const [toast, setToast] = useState(null);
+  const show = useCallback((msg, type = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 2800);
+  }, []);
+  return { toast, show };
+}
+
+// ─── ICONS ────────────────────────────────────────────────
+const Icons = {
+  dashboard: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>,
+  input: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 5v14M5 12h14"/></svg>,
+  settings: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  edit: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  trash: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  check: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+  x: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  copy: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>,
+  refresh: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+  fire: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
+  plus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+};
+
+// ─── PIE CHART ────────────────────────────────────────────
+function PieChart({ data, colors }) {
+  const canvasRef = useRef(null);
+  const chartRef  = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current || !data || data.length === 0) return;
+
+    // Destroy previous instance for this chart only
+    if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; }
+
+    const ctx = canvasRef.current.getContext('2d');
+    chartRef.current = new window.Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: data.map(d => d.category),
+        datasets: [{
+          data: data.map(d => d.amount),
+          backgroundColor: colors.slice(0, data.length),
+          borderColor: '#13161e',
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: c => {
+                const total = c.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = total > 0 ? ((c.parsed / total) * 100).toFixed(1) : '0.0';
+                return ' ' + c.label + ': ' + pct + '%';
+              }
+            },
+            titleColor: '#fff', bodyColor: '#e8eaf0',
+            backgroundColor: 'rgba(13,15,20,0.9)',
+            padding: 10, cornerRadius: 8,
+          }
+        },
+      },
+      plugins: [{
+        id: 'pctLabels',
+        afterDatasetDraw(chart) {
+          const { ctx: c, data: d } = chart;
+          const total = d.datasets[0].data.reduce((a, b) => a + b, 0);
+          if (!total) return;
+          chart.getDatasetMeta(0).data.forEach((arc, i) => {
+            const pct = (d.datasets[0].data[i] / total * 100).toFixed(1);
+            if (parseFloat(pct) < 4) return; // skip tiny slices
+            const { x, y } = arc.tooltipPosition();
+            c.save();
+            c.font = '500 11px DM Sans, sans-serif';
+            c.fillStyle = '#fff';
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            c.fillText(pct + '%', x, y);
+            c.restore();
+          });
+        }
+      }]
+    });
+
+    // Cleanup on unmount
+    return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
+  }, [JSON.stringify(data)]);
+
+  return (
+    <div style={{ position: 'relative', height: 200, width: '100%' }}>
+      <canvas ref={canvasRef} />
+    </div>
+  );
+}
+
+// ─── BAR CHART ────────────────────────────────────────────
+function BarChart({ data }) {
+  const canvasRef = useRef(null);
+  const chartRef  = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current || !data || data.length === 0) return;
+
+    // Destroy previous instance for this chart only
+    if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; }
+
+    const ctx = canvasRef.current.getContext('2d');
+    chartRef.current = new window.Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.map(d => d.month),
+        datasets: [{
+          label: 'Net Worth',
+          data: data.map(d => d.nw),
+          backgroundColor: '#6c8aff',
+          borderRadius: 3,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: c => ' ' + fmt(c.parsed.y) },
+            titleColor: '#fff', bodyColor: '#e8eaf0',
+            backgroundColor: 'rgba(13,15,20,0.9)',
+            padding: 10, cornerRadius: 8,
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: { callback: v => fmt(v), color: '#555a6e', font: { size: 10 }, maxTicksLimit: 5 },
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            border: { display: false }
+          },
+          x: {
+            ticks: { color: '#555a6e', font: { size: 10 }, maxTicksLimit: 12, maxRotation: 0 },
+            grid: { display: false },
+            border: { display: false }
+          }
+        }
+      }
+    });
+
+    return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
+  }, [JSON.stringify(data)]);
+
+  return (
+    <div style={{ position: 'relative', height: 200, width: '100%' }}>
+      <canvas ref={canvasRef} />
+    </div>
+  );
+}
+
+// ─── PROGRESS BAR ─────────────────────────────────────────
+function ProgressBar({ name, current, target, color = '#6c8aff' }) {
+  const pct = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+  return (
+    <div className="progress-row">
+      <div className="progress-header">
+        <span className="progress-name">{name}</span>
+        <span className="progress-vals">{fmt(current)} / {fmt(target)}</span>
+      </div>
+      <div className="progress-track">
+        <div className="progress-fill" style={{ width: `${pct}%`, background: color }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── CONSTANTS ─────────────────────────────────────────────
+const PIE_COLORS = ['#6c8aff','#3ecf8e','#f5a623','#2dd4bf','#a78bfa','#f66','#ff9f7f'];
+const CATEGORIES = ['Cash','Emergency Fund','Investment','Other Assets','Credit Card','Personal Loan','Other Debt'];
+const TYPES = ['Asset','Debt'];
+const CURRENCIES = ['PHP','USD','EUR','SGD','JPY','GBP','AUD','HKD','CNY','KRW'];
+
+// ─── DASHBOARD TAB ────────────────────────────────────────
+function DashboardTab({ data, loading, currency }) {
+  const [viewMonth, setViewMonth] = useState('');
+
+  useEffect(() => {
+    if (data?.currentMonth && !viewMonth) setViewMonth(data.currentMonth);
+  }, [data]);
+
+  if (loading) return (
+    <div className="content">
+      {[1,2,3,4,5].map(i => <div key={i} className="skeleton" />)}
+    </div>
+  );
+
+  if (!data) return (
+    <div className="content">
+      <div className="empty">Configure your API in Settings to get started.</div>
+    </div>
+  );
+
+  const months = data.netWorthHistory || [];
+  const monthOpts = months.map(m => m.month).reverse();
+
+  const currentData = viewMonth
+    ? months.find(m => m.month === viewMonth) || months[months.length - 1]
+    : months[months.length - 1];
+
+  const prevIdx = months.findIndex(m => m.month === currentData?.month) - 1;
+  const prevData = prevIdx >= 0 ? months[prevIdx] : null;
+  const change = prevData ? currentData.netWorth - prevData.netWorth : 0;
+  const changePct = prevData && prevData.netWorth ? (change / prevData.netWorth) * 100 : 0;
+
+  const assetAllocation = Object.entries(currentData?.categoryTotals || {})
+    .filter(([, v]) => v > 0)
+    .map(([category, amount]) => ({ category, amount }));
+
+  const chartData = months.map(m => ({
+    month: m.month.slice(2),
+    nw: Math.round(m.netWorth),
+  }));
+
+  const goalColors = { 'Cash': '#6c8aff', 'Emergency Fund': '#3ecf8e', 'Investment': '#f5a623', 'Other Assets': '#2dd4bf' };
+
+  return (
+    <div className="content">
+      {/* Net Worth */}
+      <div className="nw-card">
+        <div className="nw-label">Net Worth</div>
+        <div className="nw-amount">{currency} {fmtFull(currentData?.netWorth)}</div>
+        <div className="nw-meta">
+          {prevData && (
+            <span className={`nw-change ${change >= 0 ? 'pos' : 'neg'}`}>
+              {change >= 0 ? '▲' : '▼'} {fmt(Math.abs(change))}
+            </span>
+          )}
+          <select className="month-select" value={viewMonth} onChange={e => setViewMonth(e.target.value)}>
+            {monthOpts.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Metrics */}
+      <div className="metrics-grid">
+        <div className="metric-card">
+          <div className="metric-label">Total Assets</div>
+          <div className="metric-value green">{fmt(currentData?.totalAssets)}</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-label">Total Debt</div>
+          <div className="metric-value red">{fmt(currentData?.totalDebt)}</div>
+        </div>
+      </div>
+
+      {/* Asset Allocation */}
+      <div className="card">
+        <div className="section-title">Asset Allocation</div>
+        {assetAllocation.length > 0 ? (
+          <>
+            <PieChart data={assetAllocation} colors={PIE_COLORS} />
+            <div className="pie-legend">
+              {assetAllocation.map((e, i) => (
+                <div key={i} className="pie-legend-item">
+                  <div className="pie-legend-dot" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  {e.category}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : <div className="empty" style={{ padding: '20px 0' }}>No data</div>}
+      </div>
+
+      {/* Asset Goals */}
+      <div className="card">
+        <div className="section-title">Asset Goals</div>
+        {(data.assetGoals || []).length > 0 ? (
+          data.assetGoals.map(g => (
+            <ProgressBar key={g.category} name={g.category} current={g.current} target={g.target} color={goalColors[g.category] || '#6c8aff'} />
+          ))
+        ) : <div style={{ fontSize: 12, color: 'var(--text3)' }}>Add goal targets to Config sheet</div>}
+      </div>
+
+      {/* Investment Milestones */}
+      <div className="card">
+        <div className="section-title">Investment Milestones</div>
+        {(data.investmentMilestones || []).length > 0 ? (
+          data.investmentMilestones.map((m, i) => (
+            <ProgressBar key={i} name={m.name} current={m.current} target={m.target} color="#a78bfa" />
+          ))
+        ) : <div style={{ fontSize: 12, color: 'var(--text3)' }}>Add milestones to Config sheet</div>}
+      </div>
+
+      {/* FIRE Meter */}
+      <div className="card">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <div className="section-title" style={{ marginBottom: 0 }}>FIRE Meter</div>
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 4 }}>Road to Coast FIRE</div>
+          <ProgressBar
+            name="Investment Progress"
+            current={data.fireMetrics?.currentInvestment || 0}
+            target={data.fireMetrics?.coastFireTarget || 0}
+            color="#f5a623"
+          />
+        </div>
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+          <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 8 }}>Retirement Withdrawal (4% Rule)</div>
+          <div className="fire-grid">
+            <div className="fire-stat">
+              <div className="fire-stat-label">Yearly</div>
+              <div className="fire-stat-val">{fmt(data.fireMetrics?.retirementYearly)}</div>
+            </div>
+            <div className="fire-stat">
+              <div className="fire-stat-label">Monthly</div>
+              <div className="fire-stat-val">{fmt(data.fireMetrics?.retirementMonthly)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Net Worth Trend */}
+      <div className="card">
+        <div className="section-title">Net Worth Trend — All Time</div>
+        {chartData.length > 0 ? (
+          <BarChart data={chartData} />
+        ) : <div className="empty" style={{ padding: '20px 0' }}>No data</div>}
+      </div>
+    </div>
+  );
+}
+
+// ─── INPUT TAB ────────────────────────────────────────────
+function InputTab({ accounts, currency, onToast }) {
+  const now = new Date();
+  const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const [month, setMonth] = useState(defaultMonth);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [copyRows, setCopyRows] = useState([]);
+  const [copyLoading, setCopyLoading] = useState(false);
+  const [singleAccount, setSingleAccount] = useState('');
+  const [singleAmount, setSingleAmount] = useState('');
+
+  const loadEntries = useCallback(async () => {
+    if (!month) return;
+    setLoading(true);
+    try {
+      const d = await api('entries', null, { month });
+      setEntries(d.entries || []);
+      console.log(`[Input] Loaded ${(d.entries || []).length} entries for ${month}`);
+    } catch (e) { 
+      console.error('[Input] Error loading entries:', e);
+      onToast(e.message, 'error'); 
+    }
+    finally { setLoading(false); }
+  }, [month, onToast]);
+
+  useEffect(() => { loadEntries(); }, [loadEntries]);
+
+  async function handleSingleSubmit(e) {
+    e.preventDefault();
+    if (!singleAccount || !singleAmount) return;
+    setSubmitting(true);
+    try {
+      console.log(`[Input] Submitting entry: month=${month}, account=${singleAccount}, amount=${singleAmount}`);
+      await api('entries', 'create', {}, { month, account: singleAccount, amount: parseFloat(singleAmount) });
+      onToast('Entry added');
+      setSingleAmount('');
+      await loadEntries();
+    } catch (err) { 
+      console.error('[Input] Submit error:', err);
+      onToast(err.message, 'error'); 
+    }
+    finally { setSubmitting(false); }
+  }
+
+  async function handleEdit(id) {
+    setSubmitting(true);
+    try {
+      const entry = entries.find(e => e.id === id);
+      await api('entries', 'update', {}, { id, month: entry.month, account: entry.account, amount: parseFloat(editAmount) });
+      onToast('Entry updated');
+      setEditId(null);
+      await loadEntries();
+    } catch (err) { onToast(err.message, 'error'); }
+    finally { setSubmitting(false); }
+  }
+
+  async function handleDelete(id) {
+    if (!confirm('Delete this entry?')) return;
+    try {
+      await api('entries', 'delete', {}, { id });
+      onToast('Entry deleted');
+      await loadEntries();
+    } catch (err) { onToast(err.message, 'error'); }
+  }
+
+  async function loadCopyPrevious() {
+    setCopyLoading(true);
+    try {
+      const d = await api('entries', 'copy_previous', { month });
+      setCopyRows(d.entries.map(e => ({ ...e, checked: true })));
+      setShowCopyModal(true);
+    } catch (err) { onToast(err.message, 'error'); }
+    finally { setCopyLoading(false); }
+  }
+
+  async function submitCopyRows() {
+    const toSubmit = copyRows.filter(r => r.checked);
+    if (!toSubmit.length) { onToast('No entries selected', 'error'); return; }
+    setCopyLoading(true);
+    try {
+      for (const row of toSubmit) {
+        await api('entries', 'create', {}, { month, account: row.account, amount: parseFloat(row.amount) || 0 });
+      }
+      onToast(`${toSubmit.length} entries added`);
+      setShowCopyModal(false);
+      await loadEntries();
+    } catch (err) { onToast(err.message, 'error'); }
+    finally { setCopyLoading(false); }
+  }
+
+  function changeMonth(dir) {
+    const [y, m] = month.split('-').map(Number);
+    let ny = y, nm = m + dir;
+    if (nm > 12) { ny++; nm = 1; }
+    if (nm < 1) { ny--; nm = 12; }
+    setMonth(`${ny}-${String(nm).padStart(2, '0')}`);
+  }
+
+  return (
+    <div className="content">
+      {/* Month selector */}
+      <div className="card" style={{ padding: '12px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button className="btn btn-ghost btn-sm" onClick={() => changeMonth(-1)}>‹</button>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 16, fontWeight: 600 }}>{month}</div>
+            <div style={{ fontSize: 11, color: 'var(--text3)' }}>{entries.length} entries</div>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={() => changeMonth(1)}>›</button>
+        </div>
+      </div>
+
+      {/* Copy Previous Month */}
+      <button className="btn btn-success btn-full" onClick={loadCopyPrevious} disabled={copyLoading}>
+        📋 {copyLoading ? 'Loading...' : 'Copy from Previous Month'}
+      </button>
+
+      {/* Add Single Entry */}
+      <div className="card">
+        <div className="section-title">Add Entry</div>
+        <form onSubmit={handleSingleSubmit}>
+          <div className="form-group">
+            <label>Account</label>
+            <select value={singleAccount} onChange={e => setSingleAccount(e.target.value)} required>
+              <option value="">Select account...</option>
+              {CATEGORIES.map(cat => {
+                const catAccounts = accounts.filter(a => a.category === cat);
+                if (!catAccounts.length) return null;
+                return (
+                  <optgroup key={cat} label={cat}>
+                    {catAccounts.map(a => (
+                      <option key={a.id} value={a.account}>{a.account} ({a.currency})</option>
+                    ))}
+                  </optgroup>
+                );
+              })}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Amount ({accounts.find(a => a.account === singleAccount)?.currency || currency})</label>
+            <input type="number" step="0.01" placeholder="0.00" value={singleAmount} onChange={e => setSingleAmount(e.target.value)} required />
+          </div>
+          <button type="submit" className="btn btn-primary btn-full" disabled={submitting}>
+            ➕ {submitting ? 'Saving...' : 'Add Entry'}
+          </button>
+        </form>
+      </div>
+
+      {/* Entries for selected month */}
+      <div className="card">
+        <div className="section-title">Entries for {month}</div>
+        {loading ? [1,2,3].map(i => <div key={i} className="skeleton" />) : entries.length === 0 ? (
+          <div className="empty" style={{ padding: '20px 0' }}>No entries yet for this month.</div>
+        ) : (
+          <div>
+            {entries.map(entry => (
+              <div key={entry.id} className="entry-row">
+                <div className="entry-info">
+                  <div className="entry-account">{entry.account}</div>
+                  <div className="entry-meta">{entry.category} · {entry.currency}</div>
+                </div>
+                {editId === entry.id ? (
+                  <>
+                    <input className="entry-edit-input" type="number" step="0.01" value={editAmount} onChange={e => setEditAmount(e.target.value)} autoFocus />
+                    <div className="entry-actions">
+                      <button className="btn btn-sm btn-primary" onClick={() => handleEdit(entry.id)} disabled={submitting}>✓</button>
+                      <button className="btn btn-sm btn-ghost" onClick={() => setEditId(null)}>✕</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ textAlign: 'right' }}>
+                      <div className="entry-amount" style={{ color: entry.type === 'Debt' ? 'var(--red)' : 'var(--green)' }}>
+                        {entry.currency !== currency ? `${entry.currency} ` : ''}{entry.type === 'Debt' ? '-' : ''}{fmtFull(entry.amount)}
+                      </div>
+                      {entry.currency !== currency && entry.amountLocal !== 0 && (
+                        <div style={{ fontSize: 10, color: 'var(--text3)', fontFamily: "'DM Mono'" }}>
+                          ≈ {currency} {fmtFull(Math.abs(entry.amountLocal))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="entry-actions">
+                      <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={() => { setEditId(entry.id); setEditAmount(entry.amount); }}>{Icons.edit}</button>
+                      <button className="icon-btn" style={{ width: 30, height: 30, color: 'var(--red)' }} onClick={() => handleDelete(entry.id)}>{Icons.trash}</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Copy Previous Modal */}
+      {showCopyModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowCopyModal(false)}>
+          <div className="modal">
+            <div className="modal-title">{Icons.copy} Copy to {month}</div>
+            <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 12 }}>
+              Amounts pre-filled from previous month. Adjust as needed, uncheck to skip.
+            </div>
+            <div style={{ overflowX: 'auto', maxHeight: '50vh', overflowY: 'auto' }}>
+              <table className="copy-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 24 }}></th>
+                    <th>Account</th>
+                    <th>Cat</th>
+                    <th>Cur</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {copyRows.map((row, i) => (
+                    <tr key={i} style={{ opacity: row.checked ? 1 : 0.4 }}>
+                      <td><input type="checkbox" checked={row.checked} style={{ width: 'auto' }} onChange={e => setCopyRows(rows => rows.map((r, j) => j === i ? { ...r, checked: e.target.checked } : r))} /></td>
+                      <td><div style={{ fontSize: 12, fontWeight: 500 }}>{row.account}</div></td>
+                      <td style={{ fontSize: 11, color: 'var(--text3)' }}>{(row.category || '').split(' ').map(w => w[0]).join('')}</td>
+                      <td style={{ fontSize: 11, color: 'var(--text3)', fontFamily: "'DM Mono'" }}>{row.currency}</td>
+                      <td><input type="number" step="0.01" value={row.amount} style={{ width: '100%' }} onChange={e => setCopyRows(rows => rows.map((r, j) => j === i ? { ...r, amount: e.target.value } : r))} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-primary" style={{ flex: 1 }} onClick={submitCopyRows} disabled={copyLoading}>
+                {copyLoading ? 'Saving...' : `Submit ${copyRows.filter(r => r.checked).length} entries`}
+              </button>
+              <button className="btn btn-ghost" onClick={() => setShowCopyModal(false)}>✕</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── TEST CONNECTION ──────────────────────────────────────
+function TestConnectionButton({ onToast }) {
+  const [testing, setTesting] = useState(false);
+  const [result, setResult] = useState(null);
+
+  async function test() {
+    setTesting(true);
+    setResult(null);
+    const cfg = getConfig();
+    if (!cfg.url || !cfg.url.trim()) {
+      setResult({ ok: false, msg: 'No URL saved yet — type your URL and API key above first.' });
+      setTesting(false);
+      return;
+    }
+    try {
+      // Test with a raw JSONP call to see if the URL responds at all
+      const baseUrl = cfg.url.trim();
+      const url = new URL(baseUrl);
+      url.searchParams.set('path', 'accounts');
+      url.searchParams.set('api_key', (cfg.apiKey || '').trim());
+      const data = await jsonp(url.toString());
+      setResult({ ok: true, msg: `Connected! Found ${(data.accounts||[]).length} accounts. Currency: ${data.localCurrency}` });
+    } catch (err) {
+      setResult({ ok: false, msg: err.message });
+    }
+    setTesting(false);
+  }
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <button className="btn btn-ghost btn-full" onClick={test} disabled={testing}>
+        {testing ? '⏳ Testing...' : '🔌 Test Connection'}
+      </button>
+      {result && (
+        <div style={{
+          marginTop: 10, padding: '10px 12px', borderRadius: 8, fontSize: 13,
+          background: result.ok ? 'rgba(62,207,142,0.08)' : 'rgba(255,102,102,0.08)',
+          border: `1px solid ${result.ok ? 'rgba(62,207,142,0.3)' : 'rgba(255,102,102,0.3)'}`,
+          color: result.ok ? 'var(--green)' : 'var(--red)',
+          wordBreak: 'break-word'
+        }}>
+          {result.ok ? '✓ ' : '✗ '}{result.msg}
+        </div>
+      )}
+      {!result && (
+        <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text3)', lineHeight: 1.5 }}>
+          Make sure your Apps Script is deployed as:<br/>
+          • Execute as: <strong style={{color:'var(--text2)'}}>Me</strong><br/>
+          • Who has access: <strong style={{color:'var(--text2)'}}>Anyone</strong>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SETTINGS TAB ─────────────────────────────────────────
+function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, onToast }) {
+  const [cfg, setCfg] = useState(getConfig());
+  const [showModal, setShowModal] = useState(false);
+  const [editAccount, setEditAccount] = useState(null);
+  const [savingCfg, setSavingCfg] = useState(false);
+  const [form, setForm] = useState({ account: '', type: 'Asset', category: 'Cash', currency: 'PHP' });
+  const [savingAcc, setSavingAcc] = useState(false);
+
+  function updateCfgField(key, val) { setCfg(c => { const n = { ...c, [key]: val }; saveConfig(n); return n; }); }
+
+  async function handleSaveCurrency() {
+    setSavingCfg(true);
+    try {
+      await api('accounts', 'set_currency', {}, { currency: localCurrency });
+      onToast('Currency updated');
+    } catch (e) { onToast(e.message, 'error'); }
+    finally { setSavingCfg(false); }
+  }
+
+  function openAdd() { setForm({ account: '', type: 'Asset', category: 'Cash', currency: localCurrency || 'PHP' }); setEditAccount(null); setShowModal(true); }
+  function openEdit(acc) { setForm({ account: acc.account, type: acc.type, category: acc.category, currency: acc.currency }); setEditAccount(acc); setShowModal(true); }
+
+  async function handleSaveAccount() {
+    setSavingAcc(true);
+    try {
+      if (editAccount) {
+        await api('accounts', 'update', {}, { id: editAccount.id, ...form });
+        setAccounts(prev => prev.map(a => a.id === editAccount.id ? { ...a, ...form } : a));
+        onToast('Account updated');
+      } else {
+        const d = await api('accounts', 'create', {}, form);
+        setAccounts(prev => [...prev, { id: d.id, ...form }]);
+        onToast('Account added');
+      }
+      setShowModal(false);
+    } catch (e) { onToast(e.message, 'error'); }
+    finally { setSavingAcc(false); }
+  }
+
+  async function handleDeleteAccount(acc) {
+    if (!confirm(`Delete "${acc.account}"?`)) return;
+    try {
+      await api('accounts', 'delete', {}, { id: acc.id });
+      setAccounts(prev => prev.filter(a => a.id !== acc.id));
+      onToast('Account deleted');
+    } catch (e) { onToast(e.message, 'error'); }
+  }
+
+  const grouped = CATEGORIES.reduce((acc, cat) => {
+    acc[cat] = accounts.filter(a => a.category === cat);
+    return acc;
+  }, {});
+
+  return (
+    <div className="content">
+      {/* Connection Settings */}
+      <div className="card">
+        <div className="section-title">Connection</div>
+        <div className="form-group">
+          <label>Apps Script URL</label>
+          <input type="url" value={cfg.url || ''} onChange={e => updateCfgField('url', e.target.value)} placeholder="https://script.google.com/macros/s/.../exec" />
+        </div>
+        <div className="form-group">
+          <label>API Key</label>
+          <input type="password" value={cfg.apiKey || ''} onChange={e => updateCfgField('apiKey', e.target.value)} placeholder="Your secret key" />
+        </div>
+        <TestConnectionButton onToast={onToast} />
+      </div>
+
+      {/* Currency */}
+      <div className="card">
+        <div className="section-title">Currency</div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+          <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+            <label>Local / Base Currency</label>
+            <select value={localCurrency} onChange={e => setLocalCurrency(e.target.value)}>
+              {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <button className="btn btn-primary" onClick={handleSaveCurrency} disabled={savingCfg} style={{ height: 42, marginBottom: 0 }}>
+            Save
+          </button>
+        </div>
+      </div>
+
+      {/* Accounts */}
+      <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+          <div className="section-title" style={{ marginBottom: 0 }}>Accounts</div>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>{Icons.plus} Add</button>
+        </div>
+        {CATEGORIES.map(cat => {
+          const catAccounts = grouped[cat] || [];
+          if (!catAccounts.length) return null;
+          return (
+            <div key={cat} className="account-group">
+              <div className="account-group-title">{cat} ({catAccounts.length})</div>
+              {catAccounts.map(acc => (
+                <div key={acc.id} className="account-item">
+                  <div className="account-item-info">
+                    <div className="account-item-name">{acc.account}</div>
+                    <div style={{ display: 'flex', gap: 5, marginTop: 4, alignItems: 'center' }}>
+                      <span className={`type-badge ${acc.type === 'Asset' ? 'asset' : 'debt'}`}>{acc.type}</span>
+                      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--bg4)', color: 'var(--text2)', fontFamily: "'DM Mono'" }}>{acc.currency}</span>
+                    </div>
+                  </div>
+                  <div className="account-actions">
+                    <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={() => openEdit(acc)}>{Icons.edit}</button>
+                    <button className="icon-btn" style={{ width: 30, height: 30, color: 'var(--red)' }} onClick={() => handleDeleteAccount(acc)}>{Icons.trash}</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+        {accounts.length === 0 && <div className="empty">No accounts yet. Click Add to create one.</div>}
+      </div>
+
+      {/* Account Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
+          <div className="modal">
+            <div className="modal-title">{editAccount ? 'Edit Account' : 'Add Account'}</div>
+            <div className="form-group">
+              <label>Account Name</label>
+              <input value={form.account} onChange={e => setForm(f => ({ ...f, account: e.target.value }))} placeholder="e.g. BDO Savings" />
+            </div>
+            <div className="form-group">
+              <label>Type</label>
+              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
+                {TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Category</label>
+              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Currency</label>
+              <select value={form.currency} onChange={e => setForm(f => ({ ...f, currency: e.target.value }))}>
+                {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSaveAccount} disabled={savingAcc}>
+                {savingAcc ? 'Saving...' : 'Save'}
+              </button>
+              <button className="btn btn-ghost" onClick={() => setShowModal(false)}>✕</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── ROOT APP ─────────────────────────────────────────────
+function App() {
+  const [tab, setTab] = useState('dashboard');
+  const [dashData, setDashData] = useState(null);
+  const [dashLoading, setDashLoading] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+  const [localCurrency, setLocalCurrency] = useState('PHP');
+  const [forexRates, setForexRates] = useState({});
+  const [syncStatus, setSyncStatus] = useState('idle');
+  const { toast, show: showToast } = useToast();
+
+  async function loadAll() {
+    const cfg = getConfig();
+    if (!cfg.url) return;
+    setSyncStatus('loading');
+    setDashLoading(true);
+    try {
+      const [dash, accs] = await Promise.all([
+        api('dashboard'),
+        api('accounts')
+      ]);
+      setDashData(dash);
+      setAccounts(accs.accounts || []);
+      setLocalCurrency(accs.localCurrency || 'PHP');
+      setForexRates(accs.forexRates || {});
+      setSyncStatus('ok');
+    } catch (e) {
+      showToast(e.message, 'error');
+      setSyncStatus('error');
+    } finally { setDashLoading(false); }
+  }
+
+  useEffect(() => { loadAll(); }, []);
+
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: Icons.dashboard },
+    { id: 'input', label: 'Input', icon: Icons.input },
+    { id: 'settings', label: 'Settings', icon: Icons.settings },
+  ];
+
+  return (
+    <>
+      <div className="header">
+        <div className="header-logo">fin<span>.</span>tracker</div>
+        <div className="header-actions">
+          <div className={`sync-dot ${syncStatus === 'ok' ? 'ok' : syncStatus === 'error' ? 'err' : ''}`} title={syncStatus} />
+          <button className="icon-btn" onClick={loadAll} title="Refresh">{Icons.refresh}</button>
+        </div>
+      </div>
+
+      {tab === 'dashboard' && <DashboardTab data={dashData} loading={dashLoading} currency={localCurrency} />}
+      {tab === 'input' && <InputTab accounts={accounts} currency={localCurrency} onToast={showToast} />}
+      {tab === 'settings' && <SettingsTab accounts={accounts} setAccounts={setAccounts} localCurrency={localCurrency} setLocalCurrency={setLocalCurrency} onToast={showToast} />}
+
+      <div className="tab-bar">
+        {tabs.map(t => (
+          <button key={t.id} className={`tab-item ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+            {t.icon}
+            <span className="tab-label">{t.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+</script>
+</body>
+</html>

@@ -2,159 +2,445 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Finance Tracker</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236c8aff' width='100' height='100'/><text x='50' y='65' font-size='60' font-weight='bold' fill='white' text-anchor='middle'>ƒ</text></svg>" />
+<meta name="description" content="Personal finance and net worth tracker">
+
+<!-- PWA -->
+<meta name="theme-color" content="#FFFFFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FinTracker">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Libraries -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0f14;
-    --bg2: #13161e;
-    --bg3: #1a1e29;
-    --bg4: #222637;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #e8eaf0;
-    --text2: #8b90a0;
-    --text3: #555a6e;
-    --accent: #6c8aff;
-    --accent2: #4d6fff;
-    --green: #3ecf8e;
-    --red: #f66;
-    --amber: #f5a623;
-    --teal: #2dd4bf;
-    --purple: #a78bfa;
-  }
-  html { font-size: 16px; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #F2F4F7;
+  --surface: #FFFFFF;
+  --surface-dim: #F8FAFC;
+  --border: #E8ECF1;
+  --border-focus: #4361EE;
+  --text: #111827;
+  --text-2: #4B5563;
+  --text-3: #9CA3AF;
+  --accent: #4361EE;
+  --accent-hover: #3651D4;
+  --accent-bg: #EEF2FF;
+  --positive: #059669;
+  --positive-bg: #ECFDF5;
+  --negative: #DC2626;
+  --negative-bg: #FEF2F2;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+}
 
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg2); }
-  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
 
-  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  .header-logo { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; color: var(--text); }
-  .header-logo span { color: var(--accent); }
-  .header-actions { display: flex; gap: 8px; align-items: center; }
-  .icon-btn { background: none; border: 1px solid var(--border); border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 16px; transition: all 0.15s; }
-  .icon-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
 
-  .tab-bar { background: var(--bg2); border-top: 1px solid var(--border); display: flex; position: sticky; bottom: 0; z-index: 100; }
-  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 10px 0 8px; cursor: pointer; color: var(--text3); transition: color 0.15s; border: none; background: none; font-family: 'DM Sans'; }
-  .tab-item.active { color: var(--accent); }
-  .tab-item svg { width: 20px; height: 20px; }
-  .tab-label { font-size: 10px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; }
+/* Header */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  padding-top: env(safe-area-inset-top);
+  height: calc(56px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-logo { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.header-logo span { color: var(--accent); }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.icon-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 14px;
+  transition: all 0.15s;
+}
+.icon-btn:hover, .icon-btn:active { background: var(--surface-dim); color: var(--text); border-color: #D1D5DB; }
+.icon-btn svg { width: 16px; height: 16px; }
 
-  .content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 80px; display: flex; flex-direction: column; gap: 14px; }
+/* Tab Bar */
+.tab-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 0 8px;
+  cursor: pointer;
+  color: var(--text-3);
+  transition: color 0.15s;
+  border: none;
+  background: none;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+}
+.tab-item.active { color: var(--accent); }
+.tab-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 0 0 2px 2px;
+}
+.tab-item svg { width: 18px; height: 18px; }
+.tab-label { font-size: 10px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; }
 
-  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-  .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
 
-  .nw-card { background: linear-gradient(135deg, #1a2040 0%, #131829 100%); border: 1px solid rgba(108,138,255,0.2); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
-  .nw-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
-  .nw-amount { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 500; color: var(--text); line-height: 1; margin-bottom: 8px; }
-  .nw-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
-  .nw-change { display: flex; align-items: center; gap: 4px; font-weight: 500; }
-  .nw-change.pos { color: var(--green); }
-  .nw-change.neg { color: var(--red); }
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
 
-  .month-select { background: rgba(255,255,255,0.05); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-family: 'DM Mono'; font-size: 12px; padding: 4px 8px; cursor: pointer; outline: none; }
+/* Net Worth Card */
+.nw-card {
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #C7D2FE 100%);
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  box-shadow: var(--shadow);
+}
+.nw-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.nw-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+.nw-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.nw-change { display: flex; align-items: center; gap: 4px; font-weight: 600; font-size: 13px; }
+.nw-change.pos { color: var(--positive); }
+.nw-change.neg { color: var(--negative); }
 
-  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .metric-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-  .metric-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 6px; }
-  .metric-value { font-family: 'DM Mono'; font-size: 18px; font-weight: 500; }
-  .metric-value.green { color: var(--green); }
-  .metric-value.red { color: var(--red); }
+.month-select {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: var(--radius-xs);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
 
-  .progress-row { margin-bottom: 12px; }
-  .progress-row:last-child { margin-bottom: 0; }
-  .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .progress-name { font-size: 13px; font-weight: 500; color: var(--text); }
-  .progress-vals { font-size: 11px; font-family: 'DM Mono'; color: var(--text2); }
-  .progress-track { height: 6px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+/* Metrics Grid */
+.metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+.metric-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 6px; }
+.metric-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; }
+.metric-value.green { color: var(--positive); }
+.metric-value.red { color: var(--negative); }
 
-  .fire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .fire-stat { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
-  .fire-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 4px; }
-  .fire-stat-val { font-family: 'DM Mono'; font-size: 15px; font-weight: 500; color: var(--teal); }
+/* Progress */
+.progress-row { margin-bottom: 14px; }
+.progress-row:last-child { margin-bottom: 0; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.progress-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.progress-vals { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-2); }
+.progress-track { height: 6px; background: #E5E7EB; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
 
-  .form-group { margin-bottom: 14px; }
-  .form-group:last-child { margin-bottom: 0; }
-  label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 6px; }
-  input, select, textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-family: 'DM Sans'; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  select option { background: var(--bg3); }
-  input[type=number] { font-family: 'DM Mono'; }
+/* FIRE Grid */
+.fire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fire-stat {
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+.fire-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 4px; font-weight: 600; }
+.fire-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; color: var(--accent); }
 
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; border-radius: 8px; font-family: 'DM Sans'; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent2); }
-  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
-  .btn-ghost:hover { background: var(--bg3); color: var(--text); }
-  .btn-success { background: rgba(62,207,142,0.15); color: var(--green); border: 1px solid rgba(62,207,142,0.3); }
-  .btn-success:hover { background: rgba(62,207,142,0.25); }
-  .btn-full { width: 100%; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-sm { padding: 6px 10px; font-size: 12px; }
+/* Forms */
+.form-group { margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+input, select, textarea {
+  width: 100%;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(67,97,238,0.1);
+}
+select option { background: var(--surface); }
+input[type=number] { font-family: 'JetBrains Mono', monospace; }
 
-  .entry-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .entry-row:last-child { border-bottom: none; }
-  .entry-info { flex: 1; min-width: 0; }
-  .entry-account { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
-  .entry-meta { font-size: 11px; color: var(--text3); }
-  .entry-amount { font-family: 'DM Mono'; font-size: 14px; font-weight: 500; text-align: right; white-space: nowrap; }
-  .entry-actions { display: flex; gap: 4px; }
-  .entry-edit-input { font-family: 'DM Mono'; font-size: 14px; width: 120px; }
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-xs);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface-dim); color: var(--text); }
+.btn-success { background: var(--positive-bg); color: var(--positive); border: 1px solid rgba(5,150,105,0.2); }
+.btn-success:hover { background: #D1FAE5; }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sm { padding: 6px 10px; font-size: 12px; }
 
-  .copy-table { width: 100%; border-collapse: collapse; }
-  .copy-table th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
-  .copy-table td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
-  .copy-table input { padding: 6px 8px; font-size: 13px; width: 100%; }
+/* Entry Rows */
+.entry-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.entry-row:last-child { border-bottom: none; }
+.entry-info { flex: 1; min-width: 0; }
+.entry-account { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.entry-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.entry-amount { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; text-align: right; white-space: nowrap; }
+.entry-actions { display: flex; gap: 4px; }
+.entry-edit-input { font-family: 'JetBrains Mono', monospace; font-size: 14px; width: 120px; }
 
-  .account-group { margin-bottom: 16px; }
-  .account-group-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); padding: 8px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
-  .account-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; }
-  .account-item-info { flex: 1; min-width: 0; }
-  .account-item-name { font-size: 14px; font-weight: 500; }
-  .account-item-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
-  .account-actions { display: flex; gap: 4px; }
-  .type-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
-  .type-badge.asset { background: rgba(62,207,142,0.12); color: var(--green); }
-  .type-badge.debt { background: rgba(255,102,102,0.12); color: var(--red); }
+/* Copy Table */
+.copy-table { width: 100%; border-collapse: collapse; }
+.copy-table th {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+}
+.copy-table td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.copy-table input { padding: 6px 8px; font-size: 13px; width: 100%; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: flex-end; justify-content: center; padding: 16px; }
-  .modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px 16px 12px 12px; width: 100%; max-width: 480px; padding: 20px; max-height: 90vh; overflow-y: auto; }
-  .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+/* Account Groups */
+.account-group { margin-bottom: 16px; }
+.account-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  padding: 8px 0 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+.account-item-info { flex: 1; min-width: 0; }
+.account-item-name { font-size: 14px; font-weight: 600; }
+.account-actions { display: flex; gap: 4px; }
+.type-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+.type-badge.asset { background: var(--positive-bg); color: var(--positive); }
+.type-badge.debt { background: var(--negative-bg); color: var(--negative); }
 
-  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 500; z-index: 300; }
-  .toast.success { border-color: rgba(62,207,142,0.4); color: var(--green); }
-  .toast.error { border-color: rgba(255,102,102,0.4); color: var(--red); }
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px 20px 16px 16px;
+  width: 100%;
+  max-width: 480px;
+  padding: 24px 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.1);
+}
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
 
-  .chart-container { position: relative; height: 220px; margin: 10px 0; }
-  .pie-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .pie-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
-  .pie-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 300;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+}
+.toast.success { border-color: rgba(5,150,105,0.3); color: var(--positive); }
+.toast.error { border-color: rgba(220,38,38,0.3); color: var(--negative); }
 
-  .skeleton { background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; height: 40px; margin-bottom: 10px; }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+/* Charts */
+.pie-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.pie-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-2); font-weight: 500; }
+.pie-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
-  .sync-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-  .sync-dot.ok { background: var(--green); }
-  .sync-dot.err { background: var(--red); }
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+  height: 40px;
+  margin-bottom: 10px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-  .empty { text-align: center; padding: 32px 16px; color: var(--text3); font-size: 14px; }
+/* Sync Indicator */
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.sync-dot.ok { background: var(--positive); }
+.sync-dot.err { background: var(--negative); }
+
+/* Empty State */
+.empty { text-align: center; padding: 32px 16px; color: var(--text-3); font-size: 14px; }
 </style>
 </head>
 <body>
@@ -183,36 +469,16 @@ function getConfig() {
 
 function saveConfig(c) { localStorage.setItem('ftConfig', JSON.stringify(c)); }
 
-// ─── API (JSONP only — bypasses CORS completely) ──────────
+// ─── API (fetch with JSONP fallback) ──────────────────────
 function jsonp(url) {
   return new Promise((resolve, reject) => {
-    const cbName = `_cb_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const cb = '_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     const script = document.createElement('script');
-    const timer = setTimeout(() => {
-      cleanup();
-      reject(new Error('Request timed out after 15s — is your Apps Script URL correct and deployed as "Anyone can access"?'));
-    }, 15000);
-
-    function cleanup() {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-    }
-
-    window[cbName] = (data) => {
-      cleanup();
-      if (data && data.error) reject(new Error(data.error));
-      else resolve(data);
-    };
-
-    const fullUrl = url + '&callback=' + cbName;
-    console.log('[API] JSONP request:', fullUrl);
-    script.src = fullUrl;
-    script.onerror = (err) => {
-      cleanup();
-      console.error('[API] Script load error:', err);
-      reject(new Error('Script load failed — open the URL in a new tab to check: ' + url.split('?')[0]));
-    };
+    const timer = setTimeout(() => { cleanup(); reject(new Error('Request timed out')); }, 15000);
+    function cleanup() { clearTimeout(timer); delete window[cb]; if (script.parentNode) script.parentNode.removeChild(script); }
+    window[cb] = (data) => { cleanup(); if (data && data.error) reject(new Error(data.error)); else resolve(data); };
+    script.src = url + '&callback=' + cb;
+    script.onerror = () => { cleanup(); reject(new Error('Request failed')); };
     document.head.appendChild(script);
   });
 }
@@ -222,18 +488,26 @@ async function api(path, action, params = {}, body = null) {
   if (!cfg.url) throw new Error('No API URL set. Go to Settings and paste your Apps Script URL.');
   if (!cfg.apiKey) throw new Error('No API key set. Go to Settings and enter your API key.');
 
-  // Trim accidental whitespace from saved config
-  const baseUrl = cfg.url.trim();
-  const apiKey = (cfg.apiKey || '').trim();
-
-  const url = new URL(baseUrl);
+  const url = new URL(cfg.url.trim());
   url.searchParams.set('path', path);
-  url.searchParams.set('api_key', apiKey);
+  url.searchParams.set('api_key', (cfg.apiKey || '').trim());
   if (action) url.searchParams.set('action', action);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   if (body) url.searchParams.set('body', JSON.stringify(body));
+  const urlStr = url.toString();
 
-  return jsonp(url.toString());
+  try {
+    const res = await fetch(urlStr, { redirect: 'follow' });
+    const data = await res.json();
+    if (data && data.error) throw new Error(data.error);
+    return data;
+  } catch (fetchErr) {
+    try {
+      return await jsonp(urlStr);
+    } catch (_) {
+      throw fetchErr;
+    }
+  }
 }
 
 // ─── TOAST ────────────────────────────────────────────────
@@ -253,13 +527,25 @@ const Icons = {
   settings: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
   edit: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
   trash: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
-  check: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
-  x: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
   copy: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>,
   refresh: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
-  fire: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
   plus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  download: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
 };
+
+// ─── CONSTANTS ────────────────────────────────────────────
+const CATEGORY_COLORS = {
+  'Cash': '#6c8aff',
+  'Investment': '#f5a623',
+  'Emergency Fund': '#3ecf8e',
+  'Other Assets': '#2dd4bf',
+  'Credit Card': '#f66',
+  'Personal Loan': '#ff9f7f',
+  'Other Debt': '#a78bfa',
+};
+const CATEGORIES = ['Cash','Emergency Fund','Investment','Other Assets','Credit Card','Personal Loan','Other Debt'];
+const TYPES = ['Asset','Debt'];
+const CURRENCIES = ['PHP','USD','EUR','SGD','JPY','GBP','AUD','HKD','CNY','KRW'];
 
 // ─── PIE CHART ────────────────────────────────────────────
 function PieChart({ data, colors }) {
@@ -268,8 +554,6 @@ function PieChart({ data, colors }) {
 
   useEffect(() => {
     if (!canvasRef.current || !data || data.length === 0) return;
-
-    // Destroy previous instance for this chart only
     if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; }
 
     const ctx = canvasRef.current.getContext('2d');
@@ -279,14 +563,15 @@ function PieChart({ data, colors }) {
         labels: data.map(d => d.category),
         datasets: [{
           data: data.map(d => d.amount),
-          backgroundColor: colors.slice(0, data.length),
-          borderColor: '#13161e',
-          borderWidth: 2,
+          backgroundColor: colors,
+          borderColor: '#FFFFFF',
+          borderWidth: 3,
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '62%',
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -297,8 +582,8 @@ function PieChart({ data, colors }) {
                 return ' ' + c.label + ': ' + pct + '%';
               }
             },
-            titleColor: '#fff', bodyColor: '#e8eaf0',
-            backgroundColor: 'rgba(13,15,20,0.9)',
+            titleColor: '#fff', bodyColor: '#E8EAF0',
+            backgroundColor: 'rgba(17,24,39,0.9)',
             padding: 10, cornerRadius: 8,
           }
         },
@@ -311,10 +596,10 @@ function PieChart({ data, colors }) {
           if (!total) return;
           chart.getDatasetMeta(0).data.forEach((arc, i) => {
             const pct = (d.datasets[0].data[i] / total * 100).toFixed(1);
-            if (parseFloat(pct) < 4) return; // skip tiny slices
+            if (parseFloat(pct) < 5) return;
             const { x, y } = arc.tooltipPosition();
             c.save();
-            c.font = '500 11px DM Sans, sans-serif';
+            c.font = '600 11px Inter, sans-serif';
             c.fillStyle = '#fff';
             c.textAlign = 'center';
             c.textBaseline = 'middle';
@@ -325,7 +610,6 @@ function PieChart({ data, colors }) {
       }]
     });
 
-    // Cleanup on unmount
     return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
   }, [JSON.stringify(data)]);
 
@@ -343,8 +627,6 @@ function BarChart({ data }) {
 
   useEffect(() => {
     if (!canvasRef.current || !data || data.length === 0) return;
-
-    // Destroy previous instance for this chart only
     if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; }
 
     const ctx = canvasRef.current.getContext('2d');
@@ -355,8 +637,8 @@ function BarChart({ data }) {
         datasets: [{
           label: 'Net Worth',
           data: data.map(d => d.nw),
-          backgroundColor: '#6c8aff',
-          borderRadius: 3,
+          backgroundColor: '#4361EE',
+          borderRadius: 4,
           borderSkipped: false,
         }]
       },
@@ -367,20 +649,20 @@ function BarChart({ data }) {
           legend: { display: false },
           tooltip: {
             callbacks: { label: c => ' ' + fmt(c.parsed.y) },
-            titleColor: '#fff', bodyColor: '#e8eaf0',
-            backgroundColor: 'rgba(13,15,20,0.9)',
+            titleColor: '#fff', bodyColor: '#E8EAF0',
+            backgroundColor: 'rgba(17,24,39,0.9)',
             padding: 10, cornerRadius: 8,
           }
         },
         scales: {
           y: {
             beginAtZero: false,
-            ticks: { callback: v => fmt(v), color: '#555a6e', font: { size: 10 }, maxTicksLimit: 5 },
-            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { callback: v => fmt(v), color: '#9CA3AF', font: { size: 10, family: 'Inter' }, maxTicksLimit: 5 },
+            grid: { color: 'rgba(0,0,0,0.04)' },
             border: { display: false }
           },
           x: {
-            ticks: { color: '#555a6e', font: { size: 10 }, maxTicksLimit: 12, maxRotation: 0 },
+            ticks: { color: '#9CA3AF', font: { size: 10, family: 'Inter' }, maxTicksLimit: 12, maxRotation: 0 },
             grid: { display: false },
             border: { display: false }
           }
@@ -399,7 +681,7 @@ function BarChart({ data }) {
 }
 
 // ─── PROGRESS BAR ─────────────────────────────────────────
-function ProgressBar({ name, current, target, color = '#6c8aff' }) {
+function ProgressBar({ name, current, target, color = '#4361EE' }) {
   const pct = target > 0 ? Math.min(100, (current / target) * 100) : 0;
   return (
     <div className="progress-row">
@@ -408,17 +690,11 @@ function ProgressBar({ name, current, target, color = '#6c8aff' }) {
         <span className="progress-vals">{fmt(current)} / {fmt(target)}</span>
       </div>
       <div className="progress-track">
-        <div className="progress-fill" style={{ width: `${pct}%`, background: color }} />
+        <div className="progress-fill" style={{ width: pct + '%', background: color }} />
       </div>
     </div>
   );
 }
-
-// ─── CONSTANTS ─────────────────────────────────────────────
-const PIE_COLORS = ['#6c8aff','#3ecf8e','#f5a623','#2dd4bf','#a78bfa','#f66','#ff9f7f'];
-const CATEGORIES = ['Cash','Emergency Fund','Investment','Other Assets','Credit Card','Personal Loan','Other Debt'];
-const TYPES = ['Asset','Debt'];
-const CURRENCIES = ['PHP','USD','EUR','SGD','JPY','GBP','AUD','HKD','CNY','KRW'];
 
 // ─── DASHBOARD TAB ────────────────────────────────────────
 function DashboardTab({ data, loading, currency }) {
@@ -456,12 +732,12 @@ function DashboardTab({ data, loading, currency }) {
     .filter(([, v]) => v > 0)
     .map(([category, amount]) => ({ category, amount }));
 
+  const allocationColors = assetAllocation.map(a => CATEGORY_COLORS[a.category] || '#6B7280');
+
   const chartData = months.map(m => ({
     month: m.month.slice(2),
     nw: Math.round(m.netWorth),
   }));
-
-  const goalColors = { 'Cash': '#6c8aff', 'Emergency Fund': '#3ecf8e', 'Investment': '#f5a623', 'Other Assets': '#2dd4bf' };
 
   return (
     <div className="content">
@@ -471,7 +747,7 @@ function DashboardTab({ data, loading, currency }) {
         <div className="nw-amount">{currency} {fmtFull(currentData?.netWorth)}</div>
         <div className="nw-meta">
           {prevData && (
-            <span className={`nw-change ${change >= 0 ? 'pos' : 'neg'}`}>
+            <span className={'nw-change ' + (change >= 0 ? 'pos' : 'neg')}>
               {change >= 0 ? '▲' : '▼'} {fmt(Math.abs(change))}
             </span>
           )}
@@ -498,11 +774,11 @@ function DashboardTab({ data, loading, currency }) {
         <div className="section-title">Asset Allocation</div>
         {assetAllocation.length > 0 ? (
           <>
-            <PieChart data={assetAllocation} colors={PIE_COLORS} />
+            <PieChart data={assetAllocation} colors={allocationColors} />
             <div className="pie-legend">
               {assetAllocation.map((e, i) => (
                 <div key={i} className="pie-legend-item">
-                  <div className="pie-legend-dot" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <div className="pie-legend-dot" style={{ background: allocationColors[i] }} />
                   {e.category}
                 </div>
               ))}
@@ -516,9 +792,9 @@ function DashboardTab({ data, loading, currency }) {
         <div className="section-title">Asset Goals</div>
         {(data.assetGoals || []).length > 0 ? (
           data.assetGoals.map(g => (
-            <ProgressBar key={g.category} name={g.category} current={g.current} target={g.target} color={goalColors[g.category] || '#6c8aff'} />
+            <ProgressBar key={g.category} name={g.category} current={g.current} target={g.target} color={CATEGORY_COLORS[g.category] || '#4361EE'} />
           ))
-        ) : <div style={{ fontSize: 12, color: 'var(--text3)' }}>Add goal targets to Config sheet</div>}
+        ) : <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Add goal targets to Config sheet</div>}
       </div>
 
       {/* Investment Milestones */}
@@ -526,27 +802,25 @@ function DashboardTab({ data, loading, currency }) {
         <div className="section-title">Investment Milestones</div>
         {(data.investmentMilestones || []).length > 0 ? (
           data.investmentMilestones.map((m, i) => (
-            <ProgressBar key={i} name={m.name} current={m.current} target={m.target} color="#a78bfa" />
+            <ProgressBar key={i} name={m.name} current={m.current} target={m.target} color={CATEGORY_COLORS['Investment']} />
           ))
-        ) : <div style={{ fontSize: 12, color: 'var(--text3)' }}>Add milestones to Config sheet</div>}
+        ) : <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Add milestones to Config sheet</div>}
       </div>
 
       {/* FIRE Meter */}
       <div className="card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <div className="section-title" style={{ marginBottom: 0 }}>FIRE Meter</div>
-        </div>
+        <div className="section-title" style={{ marginBottom: 14 }}>FIRE Meter</div>
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 4 }}>Road to Coast FIRE</div>
+          <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 4 }}>Road to Coast FIRE</div>
           <ProgressBar
             name="Investment Progress"
             current={data.fireMetrics?.currentInvestment || 0}
             target={data.fireMetrics?.coastFireTarget || 0}
-            color="#f5a623"
+            color={CATEGORY_COLORS['Investment']}
           />
         </div>
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 8 }}>Retirement Withdrawal (4% Rule)</div>
+          <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 8 }}>Retirement Withdrawal (4% Rule)</div>
           <div className="fire-grid">
             <div className="fire-stat">
               <div className="fire-stat-label">Yearly</div>
@@ -562,7 +836,7 @@ function DashboardTab({ data, loading, currency }) {
 
       {/* Net Worth Trend */}
       <div className="card">
-        <div className="section-title">Net Worth Trend — All Time</div>
+        <div className="section-title">Net Worth Trend</div>
         {chartData.length > 0 ? (
           <BarChart data={chartData} />
         ) : <div className="empty" style={{ padding: '20px 0' }}>No data</div>}
@@ -574,7 +848,7 @@ function DashboardTab({ data, loading, currency }) {
 // ─── INPUT TAB ────────────────────────────────────────────
 function InputTab({ accounts, currency, onToast }) {
   const now = new Date();
-  const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const defaultMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
   const [month, setMonth] = useState(defaultMonth);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -593,11 +867,7 @@ function InputTab({ accounts, currency, onToast }) {
     try {
       const d = await api('entries', null, { month });
       setEntries(d.entries || []);
-      console.log(`[Input] Loaded ${(d.entries || []).length} entries for ${month}`);
-    } catch (e) { 
-      console.error('[Input] Error loading entries:', e);
-      onToast(e.message, 'error'); 
-    }
+    } catch (e) { onToast(e.message, 'error'); }
     finally { setLoading(false); }
   }, [month, onToast]);
 
@@ -608,15 +878,11 @@ function InputTab({ accounts, currency, onToast }) {
     if (!singleAccount || !singleAmount) return;
     setSubmitting(true);
     try {
-      console.log(`[Input] Submitting entry: month=${month}, account=${singleAccount}, amount=${singleAmount}`);
       await api('entries', 'create', {}, { month, account: singleAccount, amount: parseFloat(singleAmount) });
       onToast('Entry added');
       setSingleAmount('');
       await loadEntries();
-    } catch (err) { 
-      console.error('[Input] Submit error:', err);
-      onToast(err.message, 'error'); 
-    }
+    } catch (err) { onToast(err.message, 'error'); }
     finally { setSubmitting(false); }
   }
 
@@ -659,7 +925,7 @@ function InputTab({ accounts, currency, onToast }) {
       for (const row of toSubmit) {
         await api('entries', 'create', {}, { month, account: row.account, amount: parseFloat(row.amount) || 0 });
       }
-      onToast(`${toSubmit.length} entries added`);
+      onToast(toSubmit.length + ' entries added');
       setShowCopyModal(false);
       await loadEntries();
     } catch (err) { onToast(err.message, 'error'); }
@@ -671,26 +937,27 @@ function InputTab({ accounts, currency, onToast }) {
     let ny = y, nm = m + dir;
     if (nm > 12) { ny++; nm = 1; }
     if (nm < 1) { ny--; nm = 12; }
-    setMonth(`${ny}-${String(nm).padStart(2, '0')}`);
+    setMonth(ny + '-' + String(nm).padStart(2, '0'));
   }
 
   return (
     <div className="content">
       {/* Month selector */}
-      <div className="card" style={{ padding: '12px 16px' }}>
+      <div className="card" style={{ padding: '12px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => changeMonth(-1)}>‹</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => changeMonth(-1)}>{'‹'}</button>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 16, fontWeight: 600 }}>{month}</div>
-            <div style={{ fontSize: 11, color: 'var(--text3)' }}>{entries.length} entries</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>{month}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{entries.length} entries</div>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={() => changeMonth(1)}>›</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => changeMonth(1)}>{'›'}</button>
         </div>
       </div>
 
       {/* Copy Previous Month */}
-      <button className="btn btn-success btn-full" onClick={loadCopyPrevious} disabled={copyLoading}>
-        📋 {copyLoading ? 'Loading...' : 'Copy from Previous Month'}
+      <button className="btn btn-success btn-full" onClick={loadCopyPrevious} disabled={copyLoading} style={{ gap: 8, fontSize: 13 }}>
+        <span style={{ display: 'inline-flex', width: 16, height: 16 }}>{Icons.copy}</span>
+        {copyLoading ? 'Loading...' : 'Copy from Previous Month'}
       </button>
 
       {/* Add Single Entry */}
@@ -718,8 +985,9 @@ function InputTab({ accounts, currency, onToast }) {
             <label>Amount ({accounts.find(a => a.account === singleAccount)?.currency || currency})</label>
             <input type="number" step="0.01" placeholder="0.00" value={singleAmount} onChange={e => setSingleAmount(e.target.value)} required />
           </div>
-          <button type="submit" className="btn btn-primary btn-full" disabled={submitting}>
-            ➕ {submitting ? 'Saving...' : 'Add Entry'}
+          <button type="submit" className="btn btn-primary btn-full" disabled={submitting} style={{ gap: 8, fontSize: 13 }}>
+            <span style={{ display: 'inline-flex', width: 16, height: 16 }}>{Icons.plus}</span>
+            {submitting ? 'Saving...' : 'Add Entry'}
           </button>
         </form>
       </div>
@@ -735,31 +1003,31 @@ function InputTab({ accounts, currency, onToast }) {
               <div key={entry.id} className="entry-row">
                 <div className="entry-info">
                   <div className="entry-account">{entry.account}</div>
-                  <div className="entry-meta">{entry.category} · {entry.currency}</div>
+                  <div className="entry-meta">{entry.category} {'·'} {entry.currency}</div>
                 </div>
                 {editId === entry.id ? (
                   <>
                     <input className="entry-edit-input" type="number" step="0.01" value={editAmount} onChange={e => setEditAmount(e.target.value)} autoFocus />
                     <div className="entry-actions">
-                      <button className="btn btn-sm btn-primary" onClick={() => handleEdit(entry.id)} disabled={submitting}>✓</button>
-                      <button className="btn btn-sm btn-ghost" onClick={() => setEditId(null)}>✕</button>
+                      <button className="btn btn-sm btn-primary" onClick={() => handleEdit(entry.id)} disabled={submitting}>{'✓'}</button>
+                      <button className="btn btn-sm btn-ghost" onClick={() => setEditId(null)}>{'✕'}</button>
                     </div>
                   </>
                 ) : (
                   <>
                     <div style={{ textAlign: 'right' }}>
-                      <div className="entry-amount" style={{ color: entry.type === 'Debt' ? 'var(--red)' : 'var(--green)' }}>
-                        {entry.currency !== currency ? `${entry.currency} ` : ''}{entry.type === 'Debt' ? '-' : ''}{fmtFull(entry.amount)}
+                      <div className="entry-amount" style={{ color: entry.type === 'Debt' ? 'var(--negative)' : 'var(--positive)' }}>
+                        {entry.currency !== currency ? entry.currency + ' ' : ''}{entry.type === 'Debt' ? '-' : ''}{fmtFull(entry.amount)}
                       </div>
                       {entry.currency !== currency && entry.amountLocal !== 0 && (
-                        <div style={{ fontSize: 10, color: 'var(--text3)', fontFamily: "'DM Mono'" }}>
-                          ≈ {currency} {fmtFull(Math.abs(entry.amountLocal))}
+                        <div style={{ fontSize: 10, color: 'var(--text-3)', fontFamily: "'JetBrains Mono'" }}>
+                          {'≈'} {currency} {fmtFull(Math.abs(entry.amountLocal))}
                         </div>
                       )}
                     </div>
                     <div className="entry-actions">
                       <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={() => { setEditId(entry.id); setEditAmount(entry.amount); }}>{Icons.edit}</button>
-                      <button className="icon-btn" style={{ width: 30, height: 30, color: 'var(--red)' }} onClick={() => handleDelete(entry.id)}>{Icons.trash}</button>
+                      <button className="icon-btn" style={{ width: 30, height: 30, color: 'var(--negative)' }} onClick={() => handleDelete(entry.id)}>{Icons.trash}</button>
                     </div>
                   </>
                 )}
@@ -773,8 +1041,8 @@ function InputTab({ accounts, currency, onToast }) {
       {showCopyModal && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowCopyModal(false)}>
           <div className="modal">
-            <div className="modal-title">{Icons.copy} Copy to {month}</div>
-            <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 12 }}>
+            <div className="modal-title">Copy to {month}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12 }}>
               Amounts pre-filled from previous month. Adjust as needed, uncheck to skip.
             </div>
             <div style={{ overflowX: 'auto', maxHeight: '50vh', overflowY: 'auto' }}>
@@ -792,9 +1060,9 @@ function InputTab({ accounts, currency, onToast }) {
                   {copyRows.map((row, i) => (
                     <tr key={i} style={{ opacity: row.checked ? 1 : 0.4 }}>
                       <td><input type="checkbox" checked={row.checked} style={{ width: 'auto' }} onChange={e => setCopyRows(rows => rows.map((r, j) => j === i ? { ...r, checked: e.target.checked } : r))} /></td>
-                      <td><div style={{ fontSize: 12, fontWeight: 500 }}>{row.account}</div></td>
-                      <td style={{ fontSize: 11, color: 'var(--text3)' }}>{(row.category || '').split(' ').map(w => w[0]).join('')}</td>
-                      <td style={{ fontSize: 11, color: 'var(--text3)', fontFamily: "'DM Mono'" }}>{row.currency}</td>
+                      <td><div style={{ fontSize: 12, fontWeight: 600 }}>{row.account}</div></td>
+                      <td style={{ fontSize: 11, color: 'var(--text-3)' }}>{(row.category || '').split(' ').map(w => w[0]).join('')}</td>
+                      <td style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: "'JetBrains Mono'" }}>{row.currency}</td>
                       <td><input type="number" step="0.01" value={row.amount} style={{ width: '100%' }} onChange={e => setCopyRows(rows => rows.map((r, j) => j === i ? { ...r, amount: e.target.value } : r))} /></td>
                     </tr>
                   ))}
@@ -803,9 +1071,9 @@ function InputTab({ accounts, currency, onToast }) {
             </div>
             <div className="modal-actions">
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={submitCopyRows} disabled={copyLoading}>
-                {copyLoading ? 'Saving...' : `Submit ${copyRows.filter(r => r.checked).length} entries`}
+                {copyLoading ? 'Saving...' : 'Submit ' + copyRows.filter(r => r.checked).length + ' entries'}
               </button>
-              <button className="btn btn-ghost" onClick={() => setShowCopyModal(false)}>✕</button>
+              <button className="btn btn-ghost" onClick={() => setShowCopyModal(false)}>{'✕'}</button>
             </div>
           </div>
         </div>
@@ -824,18 +1092,13 @@ function TestConnectionButton({ onToast }) {
     setResult(null);
     const cfg = getConfig();
     if (!cfg.url || !cfg.url.trim()) {
-      setResult({ ok: false, msg: 'No URL saved yet — type your URL and API key above first.' });
+      setResult({ ok: false, msg: 'No URL saved yet — enter your URL and API key above first.' });
       setTesting(false);
       return;
     }
     try {
-      // Test with a raw JSONP call to see if the URL responds at all
-      const baseUrl = cfg.url.trim();
-      const url = new URL(baseUrl);
-      url.searchParams.set('path', 'accounts');
-      url.searchParams.set('api_key', (cfg.apiKey || '').trim());
-      const data = await jsonp(url.toString());
-      setResult({ ok: true, msg: `Connected! Found ${(data.accounts||[]).length} accounts. Currency: ${data.localCurrency}` });
+      const data = await api('accounts');
+      setResult({ ok: true, msg: 'Connected! Found ' + (data.accounts||[]).length + ' accounts. Currency: ' + data.localCurrency });
     } catch (err) {
       setResult({ ok: false, msg: err.message });
     }
@@ -845,24 +1108,24 @@ function TestConnectionButton({ onToast }) {
   return (
     <div style={{ marginTop: 12 }}>
       <button className="btn btn-ghost btn-full" onClick={test} disabled={testing}>
-        {testing ? '⏳ Testing...' : '🔌 Test Connection'}
+        {testing ? 'Testing...' : 'Test Connection'}
       </button>
       {result && (
         <div style={{
           marginTop: 10, padding: '10px 12px', borderRadius: 8, fontSize: 13,
-          background: result.ok ? 'rgba(62,207,142,0.08)' : 'rgba(255,102,102,0.08)',
-          border: `1px solid ${result.ok ? 'rgba(62,207,142,0.3)' : 'rgba(255,102,102,0.3)'}`,
-          color: result.ok ? 'var(--green)' : 'var(--red)',
-          wordBreak: 'break-word'
+          background: result.ok ? 'var(--positive-bg)' : 'var(--negative-bg)',
+          border: '1px solid ' + (result.ok ? 'rgba(5,150,105,0.3)' : 'rgba(220,38,38,0.3)'),
+          color: result.ok ? 'var(--positive)' : 'var(--negative)',
+          wordBreak: 'break-word', fontWeight: 500
         }}>
           {result.ok ? '✓ ' : '✗ '}{result.msg}
         </div>
       )}
       {!result && (
-        <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text3)', lineHeight: 1.5 }}>
+        <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-3)', lineHeight: 1.5 }}>
           Make sure your Apps Script is deployed as:<br/>
-          • Execute as: <strong style={{color:'var(--text2)'}}>Me</strong><br/>
-          • Who has access: <strong style={{color:'var(--text2)'}}>Anyone</strong>
+          {'•'} Execute as: <strong style={{color:'var(--text-2)'}}>Me</strong><br/>
+          {'•'} Who has access: <strong style={{color:'var(--text-2)'}}>Anyone</strong>
         </div>
       )}
     </div>
@@ -870,7 +1133,7 @@ function TestConnectionButton({ onToast }) {
 }
 
 // ─── SETTINGS TAB ─────────────────────────────────────────
-function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, onToast }) {
+function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, onToast, installPrompt }) {
   const [cfg, setCfg] = useState(getConfig());
   const [showModal, setShowModal] = useState(false);
   const [editAccount, setEditAccount] = useState(null);
@@ -910,7 +1173,7 @@ function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, o
   }
 
   async function handleDeleteAccount(acc) {
-    if (!confirm(`Delete "${acc.account}"?`)) return;
+    if (!confirm('Delete "' + acc.account + '"?')) return;
     try {
       await api('accounts', 'delete', {}, { id: acc.id });
       setAccounts(prev => prev.filter(a => a.id !== acc.id));
@@ -925,6 +1188,20 @@ function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, o
 
   return (
     <div className="content">
+      {/* Install App */}
+      {installPrompt && (
+        <div className="card" style={{ background: 'var(--accent-bg)', borderColor: 'rgba(67,97,238,0.15)' }}>
+          <button className="btn btn-primary btn-full" onClick={async () => {
+            try { await installPrompt.prompt(); } catch(e) {}
+          }}>
+            {Icons.download} Install App
+          </button>
+          <div style={{ fontSize: 11, color: 'var(--text-2)', textAlign: 'center', marginTop: 8 }}>
+            Add to your home screen for quick access
+          </div>
+        </div>
+      )}
+
       {/* Connection Settings */}
       <div className="card">
         <div className="section-title">Connection</div>
@@ -972,13 +1249,13 @@ function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, o
                   <div className="account-item-info">
                     <div className="account-item-name">{acc.account}</div>
                     <div style={{ display: 'flex', gap: 5, marginTop: 4, alignItems: 'center' }}>
-                      <span className={`type-badge ${acc.type === 'Asset' ? 'asset' : 'debt'}`}>{acc.type}</span>
-                      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: 'var(--bg4)', color: 'var(--text2)', fontFamily: "'DM Mono'" }}>{acc.currency}</span>
+                      <span className={'type-badge ' + (acc.type === 'Asset' ? 'asset' : 'debt')}>{acc.type}</span>
+                      <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#F3F4F6', color: 'var(--text-2)', fontFamily: "'JetBrains Mono'" }}>{acc.currency}</span>
                     </div>
                   </div>
                   <div className="account-actions">
                     <button className="icon-btn" style={{ width: 30, height: 30 }} onClick={() => openEdit(acc)}>{Icons.edit}</button>
-                    <button className="icon-btn" style={{ width: 30, height: 30, color: 'var(--red)' }} onClick={() => handleDeleteAccount(acc)}>{Icons.trash}</button>
+                    <button className="icon-btn" style={{ width: 30, height: 30, color: 'var(--negative)' }} onClick={() => handleDeleteAccount(acc)}>{Icons.trash}</button>
                   </div>
                 </div>
               ))}
@@ -1019,7 +1296,7 @@ function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, o
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSaveAccount} disabled={savingAcc}>
                 {savingAcc ? 'Saving...' : 'Save'}
               </button>
-              <button className="btn btn-ghost" onClick={() => setShowModal(false)}>✕</button>
+              <button className="btn btn-ghost" onClick={() => setShowModal(false)}>{'✕'}</button>
             </div>
           </div>
         </div>
@@ -1035,9 +1312,15 @@ function App() {
   const [dashLoading, setDashLoading] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [localCurrency, setLocalCurrency] = useState('PHP');
-  const [forexRates, setForexRates] = useState({});
   const [syncStatus, setSyncStatus] = useState('idle');
+  const [installPrompt, setInstallPrompt] = useState(null);
   const { toast, show: showToast } = useToast();
+
+  useEffect(() => {
+    const handler = e => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
 
   async function loadAll() {
     const cfg = getConfig();
@@ -1052,7 +1335,6 @@ function App() {
       setDashData(dash);
       setAccounts(accs.accounts || []);
       setLocalCurrency(accs.localCurrency || 'PHP');
-      setForexRates(accs.forexRates || {});
       setSyncStatus('ok');
     } catch (e) {
       showToast(e.message, 'error');
@@ -1073,30 +1355,63 @@ function App() {
       <div className="header">
         <div className="header-logo">fin<span>.</span>tracker</div>
         <div className="header-actions">
-          <div className={`sync-dot ${syncStatus === 'ok' ? 'ok' : syncStatus === 'error' ? 'err' : ''}`} title={syncStatus} />
+          <div className={'sync-dot ' + (syncStatus === 'ok' ? 'ok' : syncStatus === 'error' ? 'err' : '')} title={syncStatus} />
           <button className="icon-btn" onClick={loadAll} title="Refresh">{Icons.refresh}</button>
         </div>
       </div>
 
       {tab === 'dashboard' && <DashboardTab data={dashData} loading={dashLoading} currency={localCurrency} />}
       {tab === 'input' && <InputTab accounts={accounts} currency={localCurrency} onToast={showToast} />}
-      {tab === 'settings' && <SettingsTab accounts={accounts} setAccounts={setAccounts} localCurrency={localCurrency} setLocalCurrency={setLocalCurrency} onToast={showToast} />}
+      {tab === 'settings' && <SettingsTab accounts={accounts} setAccounts={setAccounts} localCurrency={localCurrency} setLocalCurrency={setLocalCurrency} onToast={showToast} installPrompt={installPrompt} />}
 
       <div className="tab-bar">
         {tabs.map(t => (
-          <button key={t.id} className={`tab-item ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+          <button key={t.id} className={'tab-item ' + (tab === t.id ? 'active' : '')} onClick={() => setTab(t.id)}>
             {t.icon}
             <span className="tab-label">{t.label}</span>
           </button>
         ))}
       </div>
 
-      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
+      {toast && <div className={'toast ' + toast.type}>{toast.msg}</div>}
     </>
   );
 }
 
 ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+</script>
+
+<script>
+// Service Worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').catch(function() {});
+  });
+}
+
+// Generate apple-touch-icon dynamically
+(function() {
+  try {
+    var s = 180;
+    var c = document.createElement('canvas');
+    c.width = s; c.height = s;
+    var ctx = c.getContext('2d');
+    var g = ctx.createLinearGradient(0, 0, s, s);
+    g.addColorStop(0, '#5B73F7');
+    g.addColorStop(1, '#3651D4');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, s, s);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 94px -apple-system, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('F', s / 2, s * 0.47);
+    var link = document.createElement('link');
+    link.rel = 'apple-touch-icon';
+    link.href = c.toDataURL('image/png');
+    document.head.appendChild(link);
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>

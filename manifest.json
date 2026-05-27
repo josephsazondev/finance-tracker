@@ -1,0 +1,25 @@
+{
+  "name": "Finance Tracker",
+  "short_name": "FinTracker",
+  "description": "Personal finance and net worth tracker",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F2F4F7",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

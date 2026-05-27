@@ -28,23 +28,23 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #F2F4F7;
-  --surface: #FFFFFF;
-  --surface-dim: #F8FAFC;
-  --border: #E8ECF1;
-  --border-focus: #4361EE;
-  --text: #111827;
-  --text-2: #4B5563;
-  --text-3: #9CA3AF;
-  --accent: #4361EE;
-  --accent-hover: #3651D4;
-  --accent-bg: #EEF2FF;
-  --positive: #059669;
-  --positive-bg: #ECFDF5;
-  --negative: #DC2626;
-  --negative-bg: #FEF2F2;
-  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --bg: #0d0f14;
+  --surface: #13161e;
+  --surface-dim: #1a1e29;
+  --border: rgba(255,255,255,0.07);
+  --border-focus: #6c8aff;
+  --text: #e8eaf0;
+  --text-2: #8b90a0;
+  --text-3: #555a6e;
+  --accent: #6c8aff;
+  --accent-hover: #4d6fff;
+  --accent-bg: rgba(108,138,255,0.1);
+  --positive: #3ecf8e;
+  --positive-bg: rgba(62,207,142,0.1);
+  --negative: #f66;
+  --negative-bg: rgba(255,102,102,0.1);
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   --radius: 16px;
   --radius-sm: 10px;
   --radius-xs: 6px;
@@ -1190,11 +1190,12 @@ function SettingsTab({ accounts, setAccounts, localCurrency, setLocalCurrency, o
     <div className="content">
       {/* Install App */}
       {installPrompt && (
-        <div className="card" style={{ background: 'var(--accent-bg)', borderColor: 'rgba(67,97,238,0.15)' }}>
+        <div className="card" style={{ background: 'var(--accent-bg)', borderColor: 'rgba(108,138,255,0.2)' }}>
           <button className="btn btn-primary btn-full" onClick={async () => {
             try { await installPrompt.prompt(); } catch(e) {}
-          }}>
-            {Icons.download} Install App
+          }} style={{ gap: 8, fontSize: 13 }}>
+            <span style={{ display: 'inline-flex', width: 16, height: 16 }}>{Icons.download}</span>
+            Install App
           </button>
           <div style={{ fontSize: 11, color: 'var(--text-2)', textAlign: 'center', marginTop: 8 }}>
             Add to your home screen for quick access

@@ -286,6 +286,7 @@ input:focus, select:focus, textarea:focus {
 }
 select option { background: var(--surface); }
 input[type=number] { font-family: 'JetBrains Mono', monospace; }
+input[type=checkbox] { -webkit-appearance: checkbox; appearance: checkbox; width: auto; padding: 0; }
 
 /* Buttons */
 .btn {
@@ -932,9 +933,8 @@ function InputTab({ accounts, currency, onToast }) {
     if (!toSubmit.length) { onToast('No entries selected', 'error'); return; }
     setCopyLoading(true);
     try {
-      for (const row of toSubmit) {
-        await api('entries', 'create', {}, { month, account: row.account, amount: parseFloat(row.amount) || 0 });
-      }
+      const entries = toSubmit.map(row => ({ month, account: row.account, amount: parseFloat(row.amount) || 0 }));
+      await api('entries', 'batch_create', {}, { entries });
       onToast(toSubmit.length + ' entries added');
       setShowCopyModal(false);
       await loadEntries();
